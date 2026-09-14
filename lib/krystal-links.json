@@ -1,0 +1,11 @@
+{
+  "robinhood:0xa9d49caa5e906558dacdc66d563ac78f0c26d4ef": "https://defi.krystal.app/pools/detail?chainId=4663&poolAddress=0xa9d49caa5e906558dacdc66d563ac78f0c26d4ef&protocol=uniswapv3",
+  "robinhood:0xd993420dfbe2e69520051b0d94b13b5aea56769f352c4d18a75a78ef806f4fae": "https://defi.krystal.app/pools/detail?chainId=4663&poolAddress=0xd993420dfbe2e69520051b0d94b13b5aea56769f352c4d18a75a78ef806f4fae&protocol=uniswapv4",
+  "base:0x44f274ef0af5a80411fa950a93aaae4333e5cac4ac7fdc1e2d7f8c66d93cebd0": "https://defi.krystal.app/pools/detail?chainId=8453&poolAddress=0x44f274ef0af5a80411fa950a93aaae4333e5cac4ac7fdc1e2d7f8c66d93cebd0&protocol=uniswapv4",
+  "base:0x2a0301ca545aa7305d3d830f7ce7ad2f647bc89f03e1aaf5b7d7c95c45b88d8b": "https://defi.krystal.app/pools/detail?chainId=8453&poolAddress=0x2a0301ca545aa7305d3d830f7ce7ad2f647bc89f03e1aaf5b7d7c95c45b88d8b&protocol=uniswapv4",
+  "base:0x2774b612b00db2dab3404b223eddf0b420cf0a1f9b87c6b587caae9555134f5c": "https://defi.krystal.app/pools/detail?chainId=8453&poolAddress=0x2774b612b00db2dab3404b223eddf0b420cf0a1f9b87c6b587caae9555134f5c&protocol=uniswapv4",
+  "robinhood:0x2d4ea79317a6a29afd1283a9a2622b83695072621cfcf1a9669604fee8eaa6c3": "https://defi.krystal.app/pools/detail?chainId=4663&poolAddress=0x2d4ea79317a6a29afd1283a9a2622b83695072621cfcf1a9669604fee8eaa6c3&protocol=uniswapv4",
+  "robinhood:0x2d0dc8b915ca0a9b1fd85311005023e354502f215e39f9c360fc5e732f45cadb": "https://defi.krystal.app/pools/detail?chainId=4663&poolAddress=0x2d0dc8b915ca0a9b1fd85311005023e354502f215e39f9c360fc5e732f45cadb&protocol=uniswapv4",
+  "base:0x392a1e7206f6f12ba5cc57c00966b9515c270f0905de93cc1ecfbc7b70a5275c": "https://defi.krystal.app/pools/detail?chainId=8453&poolAddress=0x392a1e7206f6f12ba5cc57c00966b9515c270f0905de93cc1ecfbc7b70a5275c&protocol=uniswapv4",
+  "robinhood:0x389a61da7a6c3bed785056e9ae65624ece482f35396c0f27b17d55364d0faf0b": "https://defi.krystal.app/pools/detail?chainId=4663&poolAddress=0x389a61da7a6c3bed785056e9ae65624ece482f35396c0f27b17d55364d0faf0b&protocol=uniswapv4"
+}

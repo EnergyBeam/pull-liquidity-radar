@@ -1,0 +1,22 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import ts from 'typescript';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const source=readFileSync(new URL('../lib/engine.ts',import.meta.url),'utf8');
+const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const exports={};vm.runInNewContext(js,{exports,Date,Math,Map,Set,Number,Intl});
+const {evaluate,features,finite,validAddress}=exports;
+const now=1788700000000;
+const pool={id:'test',chain:'solana',address:'abc',token:'abc',symbol:'TEST',quote:'SOL',dex:'test',price:1,liquidity:30000,v5:2500,v15:7500,v1:30000,v6:180000,v24:720000,change5:.1,change1:.5,change6:1,buys:100,sells:90,createdAt:now-86400000,fetchedAt:now,source:'test',url:''};
+test('Unknown liquidity never produces a score',()=>assert.equal(evaluate({...pool,liquidity:null},200,1,now).score,null));
+test('Zero preceding volume is unknown, not infinite acceleration',()=>{const r=evaluate({...pool,v1:30000,v5:30000},200,1,now);assert.equal(r.score,null);assert.equal(r.accel,null);});
+test('Stale responses cannot retain a positive score',()=>assert.equal(evaluate({...pool,fetchedAt:now-600001},200,1,now).score,null));
+test('High volume cannot override a severe price fall',()=>{const r=evaluate({...pool,v1:3000000,change1:-45},200,1,now);assert.ok(r.score<=30);assert.equal(r.regime,'Распродажа');});
+test('Capital larger than pool capacity is capped',()=>assert.ok(evaluate({...pool,liquidity:1000},200,1,now).score<=25));
+test('A quiet liquid pool with sustained volume can rank higher',()=>assert.ok(evaluate(pool,200,1,now).score>evaluate({...pool,change1:-30},200,1,now).score));
+test('Features exclude future and partial candles',()=>{const cs=Array.from({length:12},(_,i)=>[2400+i*300,100,102,99,101,100]);const a=features(cs,6000);const b=features([...cs,[6000,101,1000,1,800,1e9]],6000);assert.deepEqual(a,b);});
+test('Sparse history has no similarity feature vector',()=>assert.equal(features([[5700,100,101,99,100,100]],6000),null));
+test('Provider numeric parsing distinguishes absent from zero',()=>{assert.equal(finite(''),null);assert.equal(finite('bad'),null);assert.equal(finite('0'),0);});
+test('Only address-shaped inputs pass validation',()=>{assert.equal(validAddress('https://localhost/admin'),false);assert.equal(validAddress('0x'+'a'.repeat(40)),true);});
+

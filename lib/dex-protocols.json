@@ -1,0 +1,19 @@
+{
+  "uniswapv2": "uniswapv2",
+  "uniswapv3": "uniswapv3",
+  "uniswapv4": "uniswapv4",
+  "pancakeswapv2": "pancakev2",
+  "pancakeswapv3": "pancakev3",
+  "pancakev2": "pancakev2",
+  "pancakev3": "pancakev3",
+  "sushiswapv2": "sushiv2",
+  "sushiswapv3": "sushiv3",
+  "sushiv2": "sushiv2",
+  "sushiv3": "sushiv3",
+  "aerodromeslipstream": "aerodromecl",
+  "aerodromecl": "aerodromecl",
+  "aerodromeconcentrated": "aerodromecl",
+  "quickswapv2": "quickswapv2",
+  "quickswapv3": "quickswapv3",
+  "upheavalv3": "upheavalv3"
+}
