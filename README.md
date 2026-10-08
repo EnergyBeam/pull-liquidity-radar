@@ -1,26 +1,105 @@
-# PULL — Liquidity Radar
+# PULL — радар пулов ликвидности
 
-Active liquidity research dashboard. Default profile: $200, 1 hour; supported horizons: 15 minutes, 1 hour, 4 hours.
+Трекер для поиска и сравнения пулов, в которых можно предоставлять ликвидность и получать торговые комиссии. Профиль по умолчанию: позиция $200 и горизонт 1 час. Доступны также 15 минут и 4 часа.
 
-Features: live trending/new pools on Solana, Robinhood, BSC and Base; token-address lookup; local favorites; five-minute price/volume charts; transparent rule-based ranking; 58 historical observations and nearest historical examples; user-supplied fee scenarios.
+## Возможности
 
-This is an initial research model, not a validated profit predictor. Historical price returns are not LP returns. Pool TVL is not active concentrated liquidity. Fee scenarios require an effective LP fee and active liquidity share supplied by the user, exclude changes in position value and are not net PnL. Contract safety is not verified. Trending/new endpoints are a sample, not exhaustive network discovery. Public API limits can interrupt updates.
+- Поиск трендовых пулов в Solana, Robinhood, BSC и Base.
+- Поддержка пар к SOL/WSOL в Solana, USDG в Robinhood, BNB/WBNB в BSC, ETH/WETH и USDC в Base.
+- Объём отдельного пула за 5 минут и 1 час, ликвидность, капитализация и комиссия, если её сообщил источник.
+- Общий объём торгов токена за час и 5 минут, отдельно от объёма конкретного пула.
+- Сортировка по оценке, объёму пула за 5 минут и объёму токена за час, по возрастанию и убыванию.
+- Ссылки на поддерживаемые пулы Krystal и Meteora, графики и исторические аналоги.
+- Избранное и настройки в текущем браузере.
+- Telegram-уведомления о подходящих пулах и резком росте объёма.
 
-## Run
+## Источники и обновление
 
-Node 22.13+, npm ci, npm run build. Production: npm start.
-For normal development replace the development-only loopback transport in lib/market.ts with the production origins, or run the local market transport supplied in the original workspace. The loopback transport works around this machine's Node TLS connectivity issue; production uses verified HTTPS directly.
+GMGN предоставляет кандидатов и общий объём токена, DEX Screener — показатели отдельных пулов. GeckoTerminal используется для свечей и части метаданных. Доступность комиссии и прямых ссылок зависит от сети и протокола.
 
-## Validation
+Интерфейс проверяет данные каждые 30 секунд при включённом автообновлении. Локальный сборщик обновляет выборку примерно раз в 2–3 минуты, а сайт и Telegram используют общий кэш. Это ограниченная выборка кандидатов, а не полный список всех пулов сети.
 
-node --test tests/engine.test.mjs — 10 passing tests.
-node node_modules/typescript/bin/tsc --noEmit — passes.
-npm run build — passes.
-Live API smoke checks: BSC and Robinhood discovery, BSC 99 closed candles, stable cached observation timestamp and invalid-network HTTP 400.
+При ошибках API сохраняется время последнего успешного наблюдения. Оценка пула отключается для данных старше 10 минут. Ограничения частоты запросов могут задерживать обновление.
 
-npm run lint currently reports strict rules in generated UI components and application code; this check is not clean. Optional WebMCP integration is feature-detected, but no supporting browser context was available for integration testing.
+## Как устроена оценка
 
-Historical data contains token/pool addresses and market observations only. Private chat messages and participant names are not included. Favorites remain in this browser. Live refresh operates while the page is open and visible; local Telegram alerts are available through notifier/setup.py (see notifier/README.md). There is no wallet execution.
+Оценка рассчитывается по правилам: оборот относительно ликвидности, устойчивость объёма, изменение цены и размер позиции относительно TVL. Это не обученная модель и не прогноз прибыли.
 
+Резкий рост объёма: оборот за последние 5 минут не менее $1 000 и не менее чем в 3 раза выше среднего пятиминутного оборота за предыдущие 55 минут. Затухание: снижение до 25% или менее от наблюдавшегося пика в пределах часа. Отсутствующие данные не считаются затуханием.
 
-Volume monitoring: 5-minute volume >= $1,000 and >= 3x the preceding 55-minute average per 5 minutes. Fade means <=25% of an observed peak within one hour; missing or stale data is not a fade. The UI tracks observed API snapshots, the local monitor tracks its own observations in SQLite, so their detected peaks may differ. Surge Telegram alerts respect USDG, network and minimum TVL filters but do not require a high LP score. One surge episode is sent once, with a minimum 30-minute pause between surge messages for a pool. Capitalization uses market_cap_usd / marketCap; FDV is displayed separately and is never substituted for missing capitalization.
+Общий объём токена не подставляется вместо объёма пула. FDV отображается отдельно и не заменяет капитализацию.
+
+## Структура проекта
+
+- `app/` — страницы и API сайта.
+- `components/`, `hooks/` — интерфейс и React-хуки.
+- `lib/` — источники, оценка, кэш и исторические данные.
+- `notifier/` — локальный сборщик и Telegram-монитор.
+- `db/`, `drizzle/` — схема и миграции базы.
+- `scripts/`, `tests/` — вспомогательные скрипты и проверки.
+- `public/research/` — исторические рыночные свечи.
+
+## Подготовка и запуск
+
+Нужны Node.js 22.13 или новее и npm. Для локального сборщика и Telegram-монитора на Windows нужен Python 3; для окна настроек — tkinter.
+
+Проект создан для Sites и Cloudflare Workers с базой D1. Личная конфигурация `.openai/hosting.json` не включена в репозиторий, но импортируется в `vite.config.ts`. Перед запуском необходимо восстановить собственную конфигурацию Sites и привязку D1, применить миграции из `drizzle/`. Без этого копия репозитория не является готовой к запуску установкой.
+
+После настройки окружения:
+
+```powershell
+npm ci
+npm run dev
+```
+
+Для сборки и запуска собранного приложения:
+
+```powershell
+npm run build
+npm start
+```
+
+В режиме разработки GeckoTerminal-транспорт в `lib/market.ts` обращается к локальному прокси на порту 18766. Для самостоятельного запуска потребуется этот прокси либо адаптация транспорта к прямому HTTPS-доступу.
+
+## Локальный сборщик и Telegram
+
+Настройте переменную окружения `GMGN_API_KEY` вне исходников. Также поддерживается локальный файл `gmgn-credentials/gmgn-api.env` рядом с папкой проекта; его нельзя публиковать.
+
+Запуск сборщика:
+
+```powershell
+python notifier/collector.py
+```
+
+Сборщик слушает только `127.0.0.1:18767`. В `notifier/collector.py` параметр `ORIGIN` ограничивает доступ конкретным сайтом: для своей установки укажите собственный origin, включая схему и порт.
+
+На сайте нажмите «Подключить компьютер» и при запросе браузера разрешите доступ к локальной сети. Локальный поиск ограничен текущей выборкой кандидатов GMGN.
+
+Настройка Telegram:
+
+```powershell
+python notifier/setup.py
+```
+
+Токен бота вводится в локальном окне настроек и хранится с шифрованием Windows DPAPI. Сборщик и монитор работают, пока компьютер включён и процессы запущены; автоматический запуск после перезагрузки не устанавливается.
+
+Подробнее: [инструкция Telegram-монитора](notifier/README.md). Скрипты `Start-PULL.cmd` и `notifier/start-collector.ps1` учитывают исходное окружение Codex; на другом компьютере может потребоваться изменить путь к Python.
+
+## Проверки
+
+```powershell
+node --test tests/*.test.mjs
+npx tsc --noEmit
+python -m unittest discover -s notifier -p "test_*.py"
+npm run build
+```
+
+Часть проверок требует настроенного окружения сайта. Проверки Windows DPAPI выполняются на Windows. Команда `npm run lint` также доступна; в исходной версии имеются замечания линтера, включая сгенерированные компоненты.
+
+## Данные и ограничения
+
+Историческая подборка содержит адреса токенов и пулов, время сигналов и рыночные наблюдения. Сообщения частного чата и имена участников в неё не включены.
+
+Не публикуйте API-ключи, токены Telegram, файлы окружения, локальные базы, экспорт переписки и каталог `%LOCALAPPDATA%/PULL-notifier`. Избранное хранится в браузере; ключи источников не должны попадать в клиентский код.
+
+Изменение цены токена не равно доходности LP-позиции. Общий TVL не равен активной ликвидности выбранного диапазона. Расчёт комиссий — сценарий на основе введённых параметров, без полного расчёта изменения стоимости позиции. Безопасность контрактов не проверяется. Трекер не подключает кошелёк и не совершает сделки.
