@@ -55,8 +55,14 @@ def discover_direct(chain):
         pairs=get('dex','/token-pairs/v1/'+chain+'/'+address)
         if not isinstance(pairs,list): raise MarketError('DEX Screener: неверный ответ')
         return pairs
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        pairs=[p for group in executor.map(pairs_for,tokens) for p in group]
+    def safe_pairs(address):
+        try:return pairs_for(address)
+        except MarketError:return None
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        groups=list(executor.map(safe_pairs,tokens))
+    if not any(group is not None for group in groups):
+        raise MarketError('DEX Screener: не удалось обновить пулы')
+    pairs=[p for group in groups if group is not None for p in group]
     node=shutil.which('node')
     if not node: raise MarketError('Node.js не найден')
     result=subprocess.run([node,str(ROOT/'scripts/normalize-market.mjs')],input=json.dumps(dict(chain=chain,hour=hour,five=five,pairs=pairs,at=int(time.time()*1000),tokenAt=token_at)),capture_output=True,text=True,encoding='utf-8',timeout=10,creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
